@@ -13,7 +13,7 @@ cipher_suite = Fernet(key)
 def hello():
     return redirect("http://www.github.com/rmn36", code=302)
 
-@app.route('/create_user', methods=['POST'])
+@app.route('/create_user', methods=['PUT'])
 def create_user():
     content = request.get_json()
 
@@ -92,7 +92,7 @@ def get_user_db(connection, cursor, user_email):
 
     return res
 
-@app.route('/create_book', methods=['POST'])
+@app.route('/create_book', methods=['PUT'])
 def create_book():
     content = request.get_json()
 
@@ -161,7 +161,7 @@ def get_book_db(connection, cursor, isbn):
 
     return res
 
-@app.route('/add_to_wishlist', methods=['POST'])
+@app.route('/add_to_wishlist', methods=['PUT'])
 def add_to_wishlist():
     content = request.get_json()
 
@@ -221,7 +221,7 @@ def setup_db():
     password VARCHAR(200));"""
     cursor.execute(create_user_table)
 
-    insert_root_user = """INSERT INTO Users (email, first_name, last_name, password)
+    insert_root_user = """INSERT OR IGNORE INTO Users (email, first_name, last_name, password)
     VALUES ("root", "root", "root", "root");"""
     cursor.execute(insert_root_user)
 
