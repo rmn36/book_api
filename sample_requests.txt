@@ -1,0 +1,13 @@
+curl -d '{"email":"ryannowacoski.gmail.com", "first_name":"Ryan", "last_name":"Nowacoski", "password":"password"}' -H "Content-Type: application/json" -X POST http://192.168.99.100:5000/create_user
+curl -X GET http://192.168.99.100:5000/get_user/ryannowacoski.gmail.com
+
+curl -d '{"isbn":"0-7475-3269-9", "title":"Harry Potter and the Sorcerers Stone", "author":"J. K. Rowling", "pub_date":"1 September 1998"}' -H "Content-Type: application/json" -X POST http://192.168.99.100:5000/create_book
+curl -d '{"isbn":"978-0439064873", "title":"Harry Potter And The Chamber Of Secrets", "author":"J. K. Rowling", "pub_date":"1 September 2000"}' -H "Content-Type: application/json" -X POST http://192.168.99.100:5000/create_book
+
+curl -X GET http://192.168.99.100:5000/get_book/0-7475-3269-9
+curl -X GET http://192.168.99.100:5000/get_book/978-0439064873
+
+curl -d '{"isbn":"0-7475-3269-9", "user_email":"ryannowacoski.gmail.com", "notes":"BEST BOOK EVER"}' -H "Content-Type: application/json" -X POST http://192.168.99.100:5000/add_to_wishlist
+curl -d '{"isbn":"978-0439064873", "user_email":"ryannowacoski.gmail.com"}' -H "Content-Type: application/json" -X POST http://192.168.99.100:5000/add_to_wishlist
+
+curl -X GET http://192.168.99.100:5000/get_wishlist/ryannowacoski.gmail.com
