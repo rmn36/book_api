@@ -10,4 +10,4 @@ curl -X GET http://192.168.99.100:5000/get_book/978-0439064873
 curl -d '{"isbn":"0-7475-3269-9", "user_email":"ryannowacoski@gmail.com", "notes":"BEST BOOK EVER"}' -H "Content-Type: application/json" -X POST http://192.168.99.100:5000/add_to_wishlist
 curl -d '{"isbn":"978-0439064873", "user_email":"ryannowacoski@gmail.com"}' -H "Content-Type: application/json" -X POST http://192.168.99.100:5000/add_to_wishlist
 
-curl -X GET http://192.168.99.100:5000/get_wishlist/ryannowacoski.gmail.com
+curl -X GET http://192.168.99.100:5000/get_wishlist/ryannowacoski@gmail.com

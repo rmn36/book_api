@@ -13,7 +13,7 @@ cipher_suite = Fernet(key)
 def hello():
     return redirect("http://www.github.com/rmn36", code=302)
 
-@app.route('/create_user', methods=['PUT'])
+@app.route('/create_user', methods=['POST'])
 def create_user():
     content = request.get_json()
 
@@ -33,9 +33,9 @@ def create_user():
 
     connection.commit()
     connection.close()
-    return ret
+    return ret, 201
 
-@app.route('/update_user', methods=['POST'])
+@app.route('/update_user', methods=['PUT'])
 def update_user():
     content = request.get_json()
 
@@ -46,6 +46,8 @@ def update_user():
 
     if (res != None):
         res = update_user_db(connection, cursor, content)
+     else:
+        return None, 404
 
     connection.commit()
     connection.close()
@@ -76,7 +78,11 @@ def get_user(user_email):
     connection.commit()
     connection.close()
 
-    return str(res)
+    if(res != None):
+        return str(res)
+    else:
+        return str(res), 404
+    
 
 def get_user_db(connection, cursor, user_email):
     format_str = """SELECT * FROM Users WHERE email="{email}" """
@@ -92,7 +98,7 @@ def get_user_db(connection, cursor, user_email):
 
     return res
 
-@app.route('/create_book', methods=['PUT'])
+@app.route('/create_book', methods=['POST'])
 def create_book():
     content = request.get_json()
 
@@ -113,9 +119,9 @@ def create_book():
         
     connection.commit()
     connection.close()
-    return res
+    return res, 201
 
-@app.route('/update_book', methods=['POST'])
+@app.route('/update_book', methods=['PUT'])
 def update_book():
     content = request.get_json()
 
@@ -132,7 +138,9 @@ def update_book():
             cursor.execute(insert_cmd)
             res = "UPDATE BOOK: "+content["title"]
         except Error as e:
-            res = str(e)   
+            res = str(e)
+    else:
+        return None, 404
 
     connection.commit()
     connection.close()
@@ -143,25 +151,25 @@ def get_book(isbn):
     connection = sqlite3.connect("book_wishlist.db")
     cursor = connection.cursor()
 
-    res = str(get_book_db(connection, cursor, isbn))
-
+    res = get_book_db(connection, cursor, isbn)
     connection.commit()
     connection.close()
-    return res
+
+    if(res != None):
+        return str(res)
+    else:
+        return str(res), 404
 
 def get_book_db(connection, cursor, isbn):
     format_str = """SELECT * FROM Books WHERE isbn="{isbn}" """
     get_book_cmd = format_str.format(isbn=isbn)
 
-    try:
-        cursor.execute(get_book_cmd)
-        res = cursor.fetchone() #should only be 1 due to primary key
-    except Error as e:
-        res = e
+    cursor.execute(get_book_cmd)
+    res = cursor.fetchone() #should only be 1 due to primary key
 
     return res
 
-@app.route('/add_to_wishlist', methods=['PUT'])
+@app.route('/add_to_wishlist', methods=['POST'])
 def add_to_wishlist():
     content = request.get_json()
 
@@ -184,7 +192,7 @@ def add_to_wishlist():
 
     connection.commit()
     connection.close()
-    return res
+    return res, 201
 
 @app.route('/get_wishlist/<user_email>', methods=['GET'])
 def get_wishlist(user_email):
@@ -202,7 +210,12 @@ def get_wishlist(user_email):
 
     connection.commit()
     connection.close()
-    return str(res)
+
+    if (res != None):
+        return str(res)
+    else:
+        return str(res), 404
+    
 
 def setup_db():
     connection = sqlite3.connect("book_wishlist.db")
