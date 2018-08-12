@@ -194,6 +194,94 @@ def add_to_wishlist():
     connection.close()
     return res, 201
 
+@app.route('/update_wishlist', methods=['PUT'])
+def update_wishlist():
+    content = request.get_json()
+
+    connection = sqlite3.connect("book_wishlist.db")
+    cursor = connection.cursor()
+
+    format_str = """SELECT * FROM Wishlist WHERE user_email="{user_email}" AND isbn="{isbn}";"""
+    select_cmd = format_str.format(user_email=content["user_email"], isbn=content["isbn"])
+    cursor.execute(select_cmd)
+    select_result = cursor.fetchone() 
+
+    if (select_result == None):
+        return None, 404
+
+    # notes is optional
+    if ("notes" in content):
+        format_str = """UPDATE Wishlist SET notes="{notes}" WHERE user_email="{user_emaik}" AND isbn="{isbn}";"""
+        insert_cmd = format_str.format(user_email=content["user_email"], isbn=content["isbn"], notes=content["notes"])
+    else:
+        pass #notes is the only updateable content
+
+    try:
+        cursor.execute(insert_cmd)
+        res = "UPDATED "+content["isbn"]+" IN USER "+content["user_email"]+" WISHLIST"
+    except Error as e:
+        res = str(e)
+
+    connection.commit()
+    connection.close()
+    return res, 200
+
+@app.route('/delete_wishlist_item', methods=['DELETE'])
+def delete_wishlist_item():
+    content = request.get_json()
+
+    connection = sqlite3.connect("book_wishlist.db")
+    cursor = connection.cursor()
+
+    format_str = """SELECT * FROM Wishlist WHERE user_email="{user_email}" AND isbn="{isbn}";"""
+    select_cmd = format_str.format(user_email=content["user_email"], isbn=content["isbn"])
+    cursor.execute(select_cmd)
+    select_result = cursor.fetchone() 
+
+    if (select_result == None):
+        return None, 404
+
+    format_str = """DELETE FROM Wishlist WHERE user_email="{user_emaik}" AND isbn="{isbn}";"""
+    delete_cmd = format_str.format(user_email=content["user_email"], isbn=content["isbn"])
+
+    try:
+        cursor.execute(delete_cmd)
+        res = "DELETED "+content["isbn"]+" IN USER "+content["user_email"]+" WISHLIST"
+    except Error as e:
+        res = str(e)
+
+    connection.commit()
+    connection.close()
+    return res, 200
+
+@app.route('/delete_wishlist/<user_email>', methods=['DELETE'])
+def delete_wishlist(user_email):
+    content = request.get_json()
+
+    connection = sqlite3.connect("book_wishlist.db")
+    cursor = connection.cursor()
+
+    format_str = """SELECT * FROM Wishlist WHERE user_email="{user_email}";"""
+    select_cmd = format_str.format(user_email=user_email)
+    cursor.execute(select_cmd)
+    select_result = cursor.fetchone() 
+
+    if (select_result == None):
+        return None, 404
+
+    format_str = """DELETE FROM Wishlist WHERE user_email="{user_emaik}";"""
+    delete_cmd = format_str.format(user_email=user_email)
+
+    try:
+        cursor.execute(delete_cmd)
+        res = "DELETED USER "+user_email+" WISHLIST"
+    except Error as e:
+        res = str(e)
+
+    connection.commit()
+    connection.close()
+    return res, 200
+
 @app.route('/get_wishlist/<user_email>', methods=['GET'])
 def get_wishlist(user_email):
     content = request.get_json()
