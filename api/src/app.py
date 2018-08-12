@@ -46,7 +46,7 @@ def update_user():
 
     if (res != None):
         res = update_user_db(connection, cursor, content)
-     else:
+    else:
         return None, 404
 
     connection.commit()
@@ -211,7 +211,7 @@ def update_wishlist():
 
     # notes is optional
     if ("notes" in content):
-        format_str = """UPDATE Wishlist SET notes="{notes}" WHERE user_email="{user_emaik}" AND isbn="{isbn}";"""
+        format_str = """UPDATE Wishlist SET notes="{notes}" WHERE user_email="{user_email}" AND isbn="{isbn}";"""
         insert_cmd = format_str.format(user_email=content["user_email"], isbn=content["isbn"], notes=content["notes"])
     else:
         pass #notes is the only updateable content
@@ -241,7 +241,7 @@ def delete_wishlist_item():
     if (select_result == None):
         return None, 404
 
-    format_str = """DELETE FROM Wishlist WHERE user_email="{user_emaik}" AND isbn="{isbn}";"""
+    format_str = """DELETE FROM Wishlist WHERE user_email="{user_email}" AND isbn="{isbn}";"""
     delete_cmd = format_str.format(user_email=content["user_email"], isbn=content["isbn"])
 
     try:
@@ -269,7 +269,7 @@ def delete_wishlist(user_email):
     if (select_result == None):
         return None, 404
 
-    format_str = """DELETE FROM Wishlist WHERE user_email="{user_emaik}";"""
+    format_str = """DELETE FROM Wishlist WHERE user_email="{user_email}";"""
     delete_cmd = format_str.format(user_email=user_email)
 
     try:

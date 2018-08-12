@@ -57,6 +57,37 @@ class TestBookAPI(unittest.TestCase):
         reg.match(get_response.text)
         self.assertNotEqual(reg.match(get_response.text), None)
 
+    def test_delete_wishlist_item(self):
+        delete_response = requests.delete('http://api:5000/delete_wishlist_item', json={"isbn":"978-0439064873", "user_email":"ryannowacoski@gmail.com"})
+        self.assertEqual(delete_response.status_code, 200)
+
+        #Added date is impossible to know so use regex to allow that field to be anything
+        reg = re.compile('\A\[\(\'ryannowacoski@gmail.com\'\, \'0-7475-3269-9\'\, \'.*\'\, \'BEST BOOK EVER\'\)\]\Z')
+
+        get_response = requests.get('http://192.168.99.100:5000/get_wishlist/ryannowacoski@gmail.com')
+        self.assertEqual(get_response.status_code, 200)
+        reg.match(get_response.text)
+        self.assertNotEqual(reg.match(get_response.text), None)
+
+    def test_delete_wishlist(self):
+        post_response = requests.post('http://api:5000/add_to_wishlist', json={"isbn":"978-0439064873", "user_email":"ryannowacoski@gmail.com"})
+        self.assertEqual(post_response.status_code, 201)
+
+        #Added date is impossible to know so use regex to allow that field to be anything
+        reg = re.compile('\A\[\(\'ryannowacoski@gmail.com\'\, \'0-7475-3269-9\'\, \'.*\'\, \'BEST BOOK EVER\'\)\, \(\'ryannowacoski@gmail.com\'\, \'978-0439064873\'\, \'.*\'\, None\)\]\Z')
+
+        get_response = requests.get('http://192.168.99.100:5000/get_wishlist/ryannowacoski@gmail.com')
+        self.assertEqual(get_response.status_code, 200)
+        reg.match(get_response.text)
+        self.assertNotEqual(reg.match(get_response.text), None)
+
+        delete_response = requests.delete('http://api:5000/delete_wishlist/ryannowacoski@gmail.com')
+        self.assertEqual(delete_response.status_code, 200)
+
+        get_response = requests.get('http://192.168.99.100:5000/get_wishlist/ryannowacoski@gmail.com')
+        self.assertEqual(get_response.status_code, 200)
+        self.assertEqual(get_response.text, "[]")
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(TestBookAPI('test_create_user'))
@@ -65,6 +96,8 @@ def suite():
     suite.addTest(TestBookAPI('test_get_book_not_found'))
     suite.addTest(TestBookAPI('test_update_book'))
     suite.addTest(TestBookAPI('test_add_to_wishlist'))
+    suite.addTest(TestBookAPI('test_delete_wishlist_item'))
+    suite.addTest(TestBookAPI('test_delete_wishlist'))
     return suite
         
 
