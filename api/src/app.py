@@ -13,46 +13,51 @@ cipher_suite = Fernet(key)
 def hello():
     return redirect("http://www.github.com/rmn36", code=302)
 
-@app.route('/create_user', methods=['POST'])
-def create_user():
-    content = request.get_json()
-
+@app.route('/user', methods=['POST', 'PUT', 'GET'])
+def user():
     connection = sqlite3.connect("book_wishlist.db")
     cursor = connection.cursor()
 
-    res = get_user_db(connection, cursor, content)
+    if request.method == 'POST':
+        content = request.get_json()
+        
+        res = get_user_db(connection, cursor, content["email"])
 
-    if (res == None):
-        print("INSERT USER: "+content["email"])
-        format_str = """INSERT INTO Users (email, first_name, last_name, password) VALUES ("{email}", "{first}", "{last}", "{pw}");"""
-        #Encrypt password using pregenerated key
-        ciphered_pw = cipher_suite.encrypt(bytes(content["password"], 'utf-8'))
-        insert_cmd = format_str.format(email=content["email"], first=content["first_name"], last=content["last_name"], pw=ciphered_pw)
-        cursor.execute(insert_cmd)
-        ret = "CREATE USER: "+content["email"]
+        if (res == None):
+            print("INSERT USER: "+content["email"])
+            format_str = """INSERT INTO Users (email, first_name, last_name, password) VALUES ("{email}", "{first}", "{last}", "{pw}");"""
+            #Encrypt password using pregenerated key
+            ciphered_pw = cipher_suite.encrypt(bytes(content["password"], 'utf-8'))
+            insert_cmd = format_str.format(email=content["email"], first=content["first_name"], last=content["last_name"], pw=ciphered_pw)
+            cursor.execute(insert_cmd)
+            ret = "CREATE USER: "+content["email"]
+        connection.commit()
+        connection.close()
 
-    connection.commit()
-    connection.close()
-    return ret, 201
+        return ret, 201
+    elif request.method == 'PUT':
+        content = request.get_json()
+        res = get_user_db(connection, cursor, content["email"])
 
-@app.route('/update_user', methods=['PUT'])
-def update_user():
-    content = request.get_json()
+        connection.commit()
+        connection.close()
 
-    connection = sqlite3.connect("book_wishlist.db")
-    cursor = connection.cursor()
+        if (res != None):
+            res = update_user_db(connection, cursor, content)
+            return res
+        else:
+            return None, 404
+    elif request.method == 'GET':
+        user_email = request.args.get('email', '')
+        res = get_user_db(connection, cursor, user_email)
 
-    res = get_user_db(connection, cursor, content)
+        connection.commit()
+        connection.close()
 
-    if (res != None):
-        res = update_user_db(connection, cursor, content)
-    else:
-        return None, 404
-
-    connection.commit()
-    connection.close()
-
-    return res
+        if(res != None):
+            return str(res)
+        else:
+            return None, 404
 
 def update_user_db(connection, cursor, content):
     print("UPDATE USER: "+content["email"])
@@ -67,21 +72,6 @@ def update_user_db(connection, cursor, content):
         res = str(e)
     
     return res
-
-@app.route('/get_user/<user_email>', methods=['GET'])
-def get_user(user_email):
-    connection = sqlite3.connect("book_wishlist.db")
-    cursor = connection.cursor()
-
-    res = get_user_db(connection, cursor, user_email)
-
-    connection.commit()
-    connection.close()
-
-    if(res != None):
-        return str(res)
-    else:
-        return str(res), 404
     
 
 def get_user_db(connection, cursor, user_email):
